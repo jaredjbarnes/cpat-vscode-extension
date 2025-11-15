@@ -1,0 +1,66 @@
+# syntax
+import = "import"
+useParams = "use params"
+withParams = "with params"
+from = "from"
+right = "right"
+ws = /\s+/
+assign = "="
+bar = "|"
+concat = "+"
+qm = "?"
+not = "!"
+openParen = "("
+closeParen = ")"
+openBracket = "{"
+closeBracket = "}"
+comma = /\s*[,]\s*/
+trim = "trim"
+not = "!"
+optional = "?"
+pound = "#"
+newLine = /\s*(\r\n|\r|\n)\s*/
+
+literal = /"(?:\\.|[^"\\])*"/
+regexLiteral = /\/(\\/|[^\n\r])*\//
+
+integer = /[1-9][0-9]*|[0]/ 
+name = /[a-zA-Z_-]+[a-zA-Z0-9_-]*/
+patternName = name
+patternIdentifier = name
+resource = literal
+
+comment = pound + !newLine
+
+useParamPatterns = (patternName, comma)+
+useParamsStatement = useParams + ws? + openBracket + ws? + useParamPatterns + ws? + closeBracket
+
+withParamStatements = (patternAssignement, newLine)+
+withParamsExpr = withParams + ws? + openBracket + ws? + withParamStatements + ws? + closeBracket
+
+patternNames = (patternName, comma)+
+importedPatterns = openBracket + patternNames + closeBracket 
+importStatement = import + ws? + importedPatterns + ws? + from + ws? + resource + ws? + withParamsExpr?
+
+not-expr = not + ws? + patternOperatorationExpr
+optional-expr = patternOperatorationExpr + ws? + optional
+right-association-expr = patternOperatorationExpr + ws? + right
+
+patternOperatorationExpr = not-expr | optional-expr | patternIdentifier
+
+repeatBounds = openBracket + integer? + comma? + integer? + closeBracket
+oneOrMore = "+"
+zeroOrMore = "*"
+repeatOptions = oneOrMore | zeroOrMore | repeatBounds
+delimiter = comma + patternExpr + ws? + trim?
+repeatExpr = openParen + ws? + patternExpr + ws? + delimiter? + ws? + closeParen + repeatOptions
+
+sequenceExpr = patternExpr + ws? + "+" + ws? + patternExpr
+optionsExpr = patternExpr + ws? + "|" + ws? + patternExpr
+greedyOptionsExpr = patternExpr + ws? + "<|>" + ws? + patternExpr
+
+patternAlias = patternName
+patternExpr =  optionsExpr | greedyOptionsExpr | sequenceExpr | repeatExpr | literal | regexLiteral | patternOperatorationExpr 
+patternAssignement = patternName + ws? + assign + ws? + patternExpr
+statement = useParamsStatement | importStatement | patternAssignement | patternAlias
+statements = (statement, newLine)+
