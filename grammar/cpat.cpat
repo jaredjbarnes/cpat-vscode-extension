@@ -20,6 +20,7 @@ not = "!"
 optional = "?"
 pound = "#"
 newLine = /\s*(\r\n|\r|\n)\s*/
+at = "@"
 
 literal = /"(?:\\.|[^"\\])*"/
 regexLiteral = /\/(\\/|[^\n\r])*\//
@@ -30,7 +31,23 @@ patternName = name
 patternIdentifier = name
 resource = literal
 
-comment = pound + !newLine
+comment = /#[^\n\r]*/
+
+# JSON
+jsonString = literal
+jsonNumber = /-?\d+(\.\d+)?/
+jsonBoolean = "true" | "false"
+jsonNull = "null"
+jsonValue = jsonString | jsonNumber | jsonBoolean | jsonNull | jsonArray | jsonObject
+jsonArrayItems = (jsonValue, /\s*,\s*/)+
+jsonArray = "[" +ws? + jsonArrayItems? + ws? + "]"
+jsonObjectPropertyName = literal
+jsonObjectProperty = jsonObjectPropertyName + ws? + ":" + ws? + jsonValue
+jsonObjectProperties = (jsonObjectProperty, /\s*,\s*/ trim)+
+jsonObject = "{" + ws? + jsonObjectProperties? + ws? + "}"
+
+decorationName = name
+decorationStatement = at + ws? + decorationName + ws? + openParen + ws? + jsonValue? + ws? + closeParen
 
 useParamPatterns = (patternName, comma)+
 useParamsStatement = useParams + ws? + openBracket + ws? + useParamPatterns + ws? + closeBracket
@@ -42,11 +59,11 @@ patternNames = (patternName, comma)+
 importedPatterns = openBracket + patternNames + closeBracket 
 importStatement = import + ws? + importedPatterns + ws? + from + ws? + resource + ws? + withParamsExpr?
 
-not-expr = not + ws? + patternOperatorationExpr
-optional-expr = patternOperatorationExpr + ws? + optional
-right-association-expr = patternOperatorationExpr + ws? + right
+notExpr = not + ws? + patternOperatorationExpr
+optionalExpr = patternOperatorationExpr + ws? + optional
+rightAssociationExpr = patternOperatorationExpr + ws? + right
 
-patternOperatorationExpr = not-expr | optional-expr | patternIdentifier
+patternOperatorationExpr = notExpr | optionalExpr | rightAssociationExpr | patternIdentifier
 
 repeatBounds = openBracket + integer? + comma? + integer? + closeBracket
 oneOrMore = "+"
@@ -58,9 +75,10 @@ repeatExpr = openParen + ws? + patternExpr + ws? + delimiter? + ws? + closeParen
 sequenceExpr = patternExpr + ws? + "+" + ws? + patternExpr
 optionsExpr = patternExpr + ws? + "|" + ws? + patternExpr
 greedyOptionsExpr = patternExpr + ws? + "<|>" + ws? + patternExpr
+patternGroupExpr = openParen + ws? + patternExpr + ws? + closeParen
 
 patternAlias = patternName
-patternExpr =  optionsExpr | greedyOptionsExpr | sequenceExpr | repeatExpr | literal | regexLiteral | patternOperatorationExpr 
+patternExpr =  optionsExpr | greedyOptionsExpr | sequenceExpr | repeatExpr | patternGroupExpr | literal | regexLiteral | patternOperatorationExpr 
 patternAssignement = patternName + ws? + assign + ws? + patternExpr
-statement = useParamsStatement | importStatement | patternAssignement | patternAlias
+statement = useParamsStatement | importStatement  | patternAssignement | decorationStatement | patternAlias | comment 
 statements = (statement, newLine)+
