@@ -77,8 +77,8 @@ optionsExpr = patternExpr + ws? + "|" + ws? + patternExpr
 greedyOptionsExpr = patternExpr + ws? + "<|>" + ws? + patternExpr
 patternGroupExpr = openParen + ws? + patternExpr + ws? + closeParen
 
-patternAlias = patternName
-patternExpr =  optionsExpr | greedyOptionsExpr | sequenceExpr | repeatExpr | patternGroupExpr | literal | regexLiteral | patternOperatorationExpr 
+exportPattern = patternName
+patternExpr =  sequenceExpr | optionsExpr | greedyOptionsExpr |  repeatExpr | patternGroupExpr | literal | regexLiteral | patternOperatorationExpr 
 patternAssignement = patternName + ws? + assign + ws? + patternExpr
-statement = useParamsStatement | importStatement  | patternAssignement | decorationStatement | patternAlias | comment 
+statement = useParamsStatement | importStatement  | patternAssignement | decorationStatement | exportPattern | comment 
 statements = (statement, newLine)+
