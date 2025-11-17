@@ -6,6 +6,7 @@ withParams = "with params"
 from = "from"
 right = "right"
 ws = /\s+/
+ls = /[ \t]+/
 assign = "="
 bar = "|"
 concat = "+"
@@ -57,14 +58,14 @@ decorationName = name
 decorationStatement = at + ws? + decorationName + ws? + openParen + ws? + jsonValue? + ws? + closeParen
 
 useParamPatterns = (patternName, comma)+
-useParamsStatement = useParams + ws? + openBracket + ws? + useParamPatterns + ws? + closeBracket
+useParamsStatement = useParams + ls? + openBracket + ws? + useParamPatterns + ws? + closeBracket
 
 withParamStatements = (patternAssignement, newLine)+
-withParamsExpr = withParams + ws? + openBracket + ws? + withParamStatements + ws? + closeBracket
+withParamsExpr = withParams + ls? + openBracket + ws? + withParamStatements + ws? + closeBracket
 
 patternNames = (patternName, comma)+
-importedPatterns = openBracket + patternNames + closeBracket 
-importStatement = import + ws? + importedPatterns + ws? + from + ws? + resource + ws? + withParamsExpr?
+importedPatterns = openBracket + ws? + patternNames + ws? + closeBracket 
+importStatement = import + ls? + importedPatterns + ls? + from + ls? + resource + ls? + withParamsExpr?
 
 notExpr = not + ws? + unaryPatternExpr
 optionalExpr = unaryPatternExpr + ws? + optional
