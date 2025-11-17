@@ -8,10 +8,13 @@ ws = /\s+/
 assign = "="
 bar = "|"
 concat = "+"
+colon = ":"
 qm = "?"
 not = "!"
 openParen = "("
 closeParen = ")"
+openSquareBracket = "["
+closeSquareBracket = "]"
 openBracket = "{"
 closeBracket = "}"
 comma = /\s*[,]\s*/
@@ -39,12 +42,12 @@ jsonNumber = /-?\d+(\.\d+)?/
 jsonBoolean = "true" | "false"
 jsonNull = "null"
 jsonValue = jsonString | jsonNumber | jsonBoolean | jsonNull | jsonArray | jsonObject
-jsonArrayItems = (jsonValue, /\s*,\s*/)+
-jsonArray = "[" +ws? + jsonArrayItems? + ws? + "]"
+jsonArrayItems = (jsonValue, comma)+
+jsonArray = openSquareBracket +ws? + jsonArrayItems? + ws? + closeSquareBracket
 jsonObjectPropertyName = literal
-jsonObjectProperty = jsonObjectPropertyName + ws? + ":" + ws? + jsonValue
-jsonObjectProperties = (jsonObjectProperty, /\s*,\s*/ trim)+
-jsonObject = "{" + ws? + jsonObjectProperties? + ws? + "}"
+jsonObjectProperty = jsonObjectPropertyName + ws? + colon + ws? + jsonValue
+jsonObjectProperties = (jsonObjectProperty, comma trim)+
+jsonObject = openBracket + ws? + jsonObjectProperties? + ws? + closeBracket
 
 decorationName = name
 decorationStatement = at + ws? + decorationName + ws? + openParen + ws? + jsonValue? + ws? + closeParen
@@ -59,11 +62,11 @@ patternNames = (patternName, comma)+
 importedPatterns = openBracket + patternNames + closeBracket 
 importStatement = import + ws? + importedPatterns + ws? + from + ws? + resource + ws? + withParamsExpr?
 
-notExpr = not + ws? + patternOperatorationExpr
-optionalExpr = patternOperatorationExpr + ws? + optional
-rightAssociationExpr = patternOperatorationExpr + ws? + right
+notExpr = not + ws? + unaryPatternExpr
+optionalExpr = unaryPatternExpr + ws? + optional
+rightAssociationExpr = unaryPatternExpr + ws? + right
 
-patternOperatorationExpr = notExpr | optionalExpr | rightAssociationExpr | patternIdentifier
+unaryPatternExpr = notExpr | optionalExpr | rightAssociationExpr | patternIdentifier
 
 repeatBounds = openBracket + integer? + comma? + integer? + closeBracket
 oneOrMore = "+"
@@ -72,13 +75,14 @@ repeatOptions = oneOrMore | zeroOrMore | repeatBounds
 delimiter = comma + patternExpr + ws? + trim?
 repeatExpr = openParen + ws? + patternExpr + ws? + delimiter? + ws? + closeParen + repeatOptions
 
-sequenceExpr = patternExpr + ws? + "+" + ws? + patternExpr
+sequenceExpr = patternExpr + ws? + "+" + ws? + patternExpr 
 optionsExpr = patternExpr + ws? + "|" + ws? + patternExpr
 greedyOptionsExpr = patternExpr + ws? + "<|>" + ws? + patternExpr
 patternGroupExpr = openParen + ws? + patternExpr + ws? + closeParen
 
 exportPattern = patternName
-patternExpr =  sequenceExpr | optionsExpr | greedyOptionsExpr |  repeatExpr | patternGroupExpr | literal | regexLiteral | patternOperatorationExpr 
+patternExpr =  sequenceExpr | optionsExpr | greedyOptionsExpr |  repeatExpr | patternGroupExpr | literal | regexLiteral | unaryPatternExpr 
 patternAssignement = patternName + ws? + assign + ws? + patternExpr
 statement = useParamsStatement | importStatement  | patternAssignement | decorationStatement | exportPattern | comment 
 statements = (statement, newLine)+
+cpat = statements
