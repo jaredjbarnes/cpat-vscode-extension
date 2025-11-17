@@ -1,4 +1,5 @@
 # syntax
+syntax = "syntax"
 import = "import"
 useParams = "use params"
 withParams = "with params"
@@ -23,6 +24,7 @@ not = "!"
 optional = "?"
 pound = "#"
 newLine = /\s*(\r\n|\r|\n)\s*/
+syntaxVersion = /\S*/
 at = "@"
 
 literal = /"(?:\\.|[^"\\])*"/
@@ -48,6 +50,8 @@ jsonObjectPropertyName = literal
 jsonObjectProperty = jsonObjectPropertyName + ws? + colon + ws? + jsonValue
 jsonObjectProperties = (jsonObjectProperty, comma trim)+
 jsonObject = openBracket + ws? + jsonObjectProperties? + ws? + closeBracket
+
+syntaxStatement = syntax + ws? + syntaxVersion
 
 decorationName = name
 decorationStatement = at + ws? + decorationName + ws? + openParen + ws? + jsonValue? + ws? + closeParen
@@ -85,4 +89,4 @@ patternExpr =  sequenceExpr | optionsExpr | greedyOptionsExpr |  repeatExpr | pa
 patternAssignement = patternName + ws? + assign + ws? + patternExpr
 statement = useParamsStatement | importStatement  | patternAssignement | decorationStatement | exportPattern | comment 
 statements = (statement, newLine)+
-cpat = statements
+cpat = ws? + syntaxStatement? + ws? + statements
